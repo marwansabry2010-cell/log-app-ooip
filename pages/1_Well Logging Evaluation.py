@@ -128,8 +128,8 @@ if st.session_state.get("authenticated"):
 
 
         with tab2:
-            Histogram_Feature =st.selectbox('**Select feature to histogram** :' , numerical_columns)
-            fig_hist =px.histogram(df , x= 'GR')
+            x_column =st.selectbox('**Select feature to histogram** :' , numerical_columns)
+            fig_hist =px.histogram(df , x= x_column)
             st.plotly_chart(fig_hist)
 
 
