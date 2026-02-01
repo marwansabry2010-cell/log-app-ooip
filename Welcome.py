@@ -32,9 +32,10 @@ with col1:
 
 with col2:
     st.image(
-        "https://eco-cdn.iqpc.com/eco/images/channel_content/images/offshore_platform.webp",
-        use_container_width=True
+    "https://eco-cdn.iqpc.com/eco/images/channel_content/images/offshore_platform.webp",
+    width="stretch"
     )
+
 
 st.divider()
 
