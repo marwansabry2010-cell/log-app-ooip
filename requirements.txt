@@ -4,4 +4,4 @@ numpy
 matplotlib
 plotly.express
 lasio
-
+matplotlib.ticker
