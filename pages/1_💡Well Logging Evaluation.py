@@ -6,10 +6,8 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import lasio
-import io
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MultipleLocator
+from matplotlib.ticker import MultipleLocator , AutoMinorLocator
 
 
 # ============================================================
