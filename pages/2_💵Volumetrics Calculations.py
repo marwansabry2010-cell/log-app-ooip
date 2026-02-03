@@ -7,7 +7,11 @@ if not st.session_state.get("authenticated"):
 
 if st.session_state.get("authenticated"):
 
-    st.title(" Volumetric Calculations \nOOIP & OGIP ")
+    
+    st.title("💸 Volumetric Calculations")
+    st.write("________________________")
+    st.title(" OOIP & OGIP ")
+
     st.write("________________________")
 
     Hydrocarbon_Type = st.selectbox('**Choose Type**', ["Oil", "Gas"])
