@@ -215,7 +215,7 @@ if st.session_state.get("authenticated"):
             ax[3].set_xlim(0.2, 2000)
 
             # ---- Sw ----
-            if results:
+            if result_df is not None:
                 ax[4].plot(z["Sw"], z["Depth"], color="purple")
                 ax[4].set_xlabel("Sw")
                 ax[4].set_xlim(0, 1)
