@@ -18,8 +18,6 @@ if not st.session_state.get("authenticated"):
     st.switch_page("Welcome.py")
 
 if st.session_state.get("authenticated"):
-
-
     st.set_page_config(page_title="Petrophysical Analysis", layout="wide")
     st.title("🛢️ Integrated Petrophysical Evaluation")
 
@@ -173,6 +171,11 @@ if st.session_state.get("authenticated"):
                 results.append(z)
 
             result_df = pd.concat(results)
+            if results:
+                result_df = pd.concat(results)
+            else:
+                result_df = pd.DataFrame()
+
             st.success("✅ Petrophysical calculations completed")
 
     # ============================================================
@@ -181,7 +184,7 @@ if st.session_state.get("authenticated"):
     with tab3:
         st.header("📈 Log & Interpretation Plots")
         
-        if uploaded_file:
+        if uploaded_file and not result_df.empty:
             fig, ax = plt.subplots(1, 7, figsize=(18, 100), sharey=True)
 
             # 👉 Set depth ticks every 10 m
@@ -208,21 +211,21 @@ if st.session_state.get("authenticated"):
             ax[3].set_xscale("log")
             ax[3].set_xlim(0.2, 2000)
 
-            # ---- Sw ----
-            if results:
-                ax[4].plot(z["Sw"], z["Depth"], color="purple")
-                ax[4].set_xlabel("Sw")
+            # ---- Vsh ----
+            if not result_df.empty:
+                ax[4].plot(result_df["Vsh"], result_df["Depth"], color="green")
+                ax[4].set_xlabel("Vsh")
                 ax[4].set_xlim(0, 1)
 
             # ---- PHIE ----
-            if results:
-                ax[5].plot(z["PHIE"], z["Depth"], color="blue")
+            if not result_df.empty:
+                ax[5].plot(result_df["PHIE"], result_df["Depth"], color="blue")
                 ax[5].set_xlabel("PHIE")
                 ax[5].set_xlim(0, 1)
             
             # ---- Sw ----
-            if results:
-                ax[6].plot(z["Sw"], z["Depth"], color="purple")
+            if not result_df.empty:
+                ax[6].plot(result_df["Sw"], result_df["Depth"], color="purple")
                 ax[6].set_xlabel("Sw")
                 ax[6].set_xlim(0, 1)
 
@@ -242,7 +245,7 @@ if st.session_state.get("authenticated"):
     with tab4:
         st.header("📊 Zone & Reservoir Summary")
 
-        if uploaded_file:
+        if uploaded_file and not result_df.empty:
 
             summaries = []
             dz = df["Depth"].diff().median()
