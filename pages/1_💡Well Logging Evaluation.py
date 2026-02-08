@@ -208,23 +208,10 @@ if st.session_state.get("authenticated"):
             ax[3].set_xscale("log")
             ax[3].set_xlim(0.2, 2000)
 
-            # # ---- RT60 ----
-            # ax[3].plot(df["RT60"], df["Depth"], color="blue")
-            # ax[3].set_xlabel("RT60 (ohm.m)")
-            # ax[3].set_xscale("log")
-            # ax[3].set_xlim(0.2, 2000)
-
-
-            # ---- RT ----
-            ax[3].plot(df["RT10"], df["Depth"], color="red")
-            ax[3].set_xlabel("RT10 (ohm.m)")
-            ax[3].set_xscale("log")
-            ax[3].set_xlim(0.2, 2000)
-
-            # ---- vsh ----
+            # ---- Sw ----
             if results:
-                ax[4].plot(z["Vsh"], z["Depth"], color="green")
-                ax[4].set_xlabel("Vsh")
+                ax[4].plot(z["Sw"], z["Depth"], color="purple")
+                ax[4].set_xlabel("Sw")
                 ax[4].set_xlim(0, 1)
 
             # ---- PHIE ----
