@@ -20,12 +20,6 @@ if not st.session_state.get("authenticated"):
 if st.session_state.get("authenticated"):
 
 
-
-
-
-
-
-
     st.set_page_config(page_title="Petrophysical Analysis", layout="wide")
     st.title("🛢️ Integrated Petrophysical Evaluation")
 
@@ -66,14 +60,14 @@ if st.session_state.get("authenticated"):
             Columns_to_show=st.multiselect("**Select coloumns to show** : ", df.columns.to_list() , default=df.columns.to_list())
             numerical_columns = df.select_dtypes(include=np.number).columns.to_list()
             st.write(df[:n_rows][Columns_to_show])
-            # required_cols = ["Depth", "GR", "RHOB", "NPHI", "RT", "PE"]
+            required_cols = ["Depth", "GR", "RHOB", "NPHI", "RT", "PE"]
 
-            # if not all(col in df.columns for col in required_cols):
-            #     st.error("❌ CSV must contain all required curves")
-            # else:
-            #     df = df.dropna().sort_values("Depth").reset_index(drop=True)
-            #     st.success("✅ Well logs loaded successfully")
-            #     st.dataframe(df.head())
+            if not all(col in df.columns for col in required_cols):
+                st.error("❌ CSV must contain all required curves")
+            else:
+                df = df.dropna().sort_values("Depth").reset_index(drop=True)
+                st.success("✅ Well logs loaded successfully")
+                st.dataframe(df.head())
 
         st.markdown("---")
         st.header("📊 Zone-Based Petrophysical Parameters")
@@ -84,7 +78,7 @@ if st.session_state.get("authenticated"):
             "Zone Name": [f"Zone_{i+1}" for i in range(n_zones)],
             "Top Depth": [0.0] * n_zones,
             "Base Depth": [0.0] * n_zones,
-            "GR_clean": [30.0] * n_zones,
+            "GR_clean": [20.0] * n_zones,
             "GR_shale": [120.0] * n_zones,
             "Matrix Density": [2.65] * n_zones,
             "Shale Density": [2.40] * n_zones,
@@ -92,7 +86,7 @@ if st.session_state.get("authenticated"):
             "a": [1.0] * n_zones,
             "m": [2.0] * n_zones,
             "n": [2.0] * n_zones,
-            "Rw": [0.1] * n_zones
+            "Rw": [0.03] * n_zones
         }
 
         zone_df = st.data_editor(pd.DataFrame(zone_input), num_rows="dynamic")
@@ -188,7 +182,7 @@ if st.session_state.get("authenticated"):
         st.header("📈 Log & Interpretation Plots")
         
         if uploaded_file:
-            fig, ax = plt.subplots(1, 5, figsize=(18, 100), sharey=True)
+            fig, ax = plt.subplots(1, 7, figsize=(18, 100), sharey=True)
 
             # 👉 Set depth ticks every 10 m
             depth_locator = MultipleLocator(10)
@@ -208,17 +202,42 @@ if st.session_state.get("authenticated"):
             ax[2].set_xlabel("NPHI (v/v)")
             ax[2].set_xlim(0.45, -0.15)
 
-            # ---- RT ----
+            # ---- RT10 ----
             ax[3].plot(df["RT"], df["Depth"], color="black")
             ax[3].set_xlabel("RT (ohm.m)")
             ax[3].set_xscale("log")
             ax[3].set_xlim(0.2, 2000)
 
+            # # ---- RT60 ----
+            # ax[3].plot(df["RT60"], df["Depth"], color="blue")
+            # ax[3].set_xlabel("RT60 (ohm.m)")
+            # ax[3].set_xscale("log")
+            # ax[3].set_xlim(0.2, 2000)
+
+
+            # ---- RT ----
+            ax[3].plot(df["RT10"], df["Depth"], color="red")
+            ax[3].set_xlabel("RT10 (ohm.m)")
+            ax[3].set_xscale("log")
+            ax[3].set_xlim(0.2, 2000)
+
+            # ---- vsh ----
+            if results:
+                ax[4].plot(z["Vsh"], z["Depth"], color="green")
+                ax[4].set_xlabel("Vsh")
+                ax[4].set_xlim(0, 1)
+
+            # ---- PHIE ----
+            if results:
+                ax[5].plot(z["PHIE"], z["Depth"], color="blue")
+                ax[5].set_xlabel("PHIE")
+                ax[5].set_xlim(0, 1)
+            
             # ---- Sw ----
             if results:
-                ax[4].plot(z["Sw"], z["Depth"], color="purple")
-                ax[4].set_xlabel("Sw")
-                ax[4].set_xlim(0, 1)
+                ax[6].plot(z["Sw"], z["Depth"], color="purple")
+                ax[6].set_xlabel("Sw")
+                ax[6].set_xlim(0, 1)
 
             # ---- Common formatting ----
             for a in ax:
@@ -229,13 +248,6 @@ if st.session_state.get("authenticated"):
             plt.tight_layout()
             st.pyplot(fig)
 
-
-
-        
-        
-        
-        
-    
 
     # ============================================================
     # TAB 4 – RESULTS & SUMMARY (ENHANCED)

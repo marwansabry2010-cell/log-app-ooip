@@ -5,11 +5,32 @@ from datetime import date
 # =========================
 # PAGE CONFIG
 # =========================
+
+
 st.set_page_config(
     page_title="Log-App | Petrophysical Analysis",
     page_icon="🛢️",
     layout="wide"
 )
+
+st.write("✅ App started successfully")
+
+
+
+
+
+# =========================
+# PAGE CONFIG
+# # =========================
+# st.set_page_config(
+#     page_title="Log-App | Petrophysical Analysis",
+#     page_icon="🛢️",
+#     layout="wide"
+# )
+
+
+
+
 
 # =========================
 # HEADER
