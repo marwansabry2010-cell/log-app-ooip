@@ -285,3 +285,4 @@ if st.session_state.get("authenticated"):
             }))
 
             st.success("✅ Zone-level petrophysical summary generated")
+

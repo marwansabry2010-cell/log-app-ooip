@@ -7,22 +7,16 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator , AutoMinorLocator
 
-# ============================================================
-# STREAMLIT CONFIGURATION
-# ============================================================
-st.set_page_config(page_title="Petrophysical Analysis", layout="wide")
-st.title("🛢️ Integrated Petrophysical Evaluation")
 
-# ============================================================
-# SIDEBAR – WELL INFORMATION
-# ============================================================
+
 st.sidebar.header("🧾 Well Information")
 well_name = st.sidebar.text_input("Well Name", "Well-01")
 field_name = st.sidebar.text_input("Field Name", "Field-A")
 
 st.sidebar.markdown("---")
-n_zones = st.sidebar.number_input("Number of Zones", 1, 10, 3)
+# n_zones = st.sidebar.number_input("Number of Zones", 1, 10, 3)
 
 # ============================================================
 # TABS
@@ -35,15 +29,23 @@ tab1, tab2, tab3, tab4 = st.tabs([
 ])
 
 # ============================================================
-# TAB 1 – INPUT DATA
+# TAB 1 – INPUT DATA & ZONE PARAMETERS
 # ============================================================
 with tab1:
     st.header("📥 Import Well Logs (CSV)")
+    st.write("____________________________")  
+    st.write("**Required Columns to start well analysis** : ")
+    st.write(':blue[**Depth, GR, RHOB, NPHI, RT, PE**]')
+    st.write("____________________________")  
     uploaded_file = st.file_uploader("Upload CSV File", type=["csv"])
 
     if uploaded_file:
         df = pd.read_csv(uploaded_file)
-        required_cols = ["Depth", "GR", "RHOB", "NPHI", "RT", "DT", "PE"]
+        n_rows = st.slider('**Choose the number of rows to display** : ', min_value=5 , max_value=len(df),step=1)
+        Columns_to_show=st.multiselect("**Select coloumns to show** : ", df.columns.to_list() , default=df.columns.to_list())
+        numerical_columns = df.select_dtypes(include=np.number).columns.to_list()
+        st.write(df[:n_rows][Columns_to_show])
+        required_cols = ["Depth", "GR", "RHOB", "NPHI", "RT", "PE"]
 
         if not all(col in df.columns for col in required_cols):
             st.error("❌ CSV must contain all required curves")
@@ -54,12 +56,14 @@ with tab1:
 
     st.markdown("---")
     st.header("📊 Zone-Based Petrophysical Parameters")
+    n_zones = st.number_input("**Insert Number of Zones below** :- ", 1, 200, 3)
+    st.write("____________________________") 
 
     zone_input = {
         "Zone Name": [f"Zone_{i+1}" for i in range(n_zones)],
         "Top Depth": [0.0] * n_zones,
         "Base Depth": [0.0] * n_zones,
-        "GR_clean": [30.0] * n_zones,
+        "GR_clean": [20.0] * n_zones,
         "GR_shale": [120.0] * n_zones,
         "Matrix Density": [2.65] * n_zones,
         "Shale Density": [2.40] * n_zones,
@@ -67,7 +71,7 @@ with tab1:
         "a": [1.0] * n_zones,
         "m": [2.0] * n_zones,
         "n": [2.0] * n_zones,
-        "Rw": [0.1] * n_zones
+        "Rw": [0.03] * n_zones
     }
 
     zone_df = st.data_editor(pd.DataFrame(zone_input), num_rows="dynamic")
@@ -154,6 +158,11 @@ with tab2:
             results.append(z)
 
         result_df = pd.concat(results)
+        if results:
+            result_df = pd.concat(results)
+        else:
+            result_df = pd.DataFrame()
+
         st.success("✅ Petrophysical calculations completed")
 
 # ============================================================
@@ -161,18 +170,61 @@ with tab2:
 # ============================================================
 with tab3:
     st.header("📈 Log & Interpretation Plots")
+    
+    if uploaded_file and not result_df.empty:
+        fig, ax = plt.subplots(1, 7, figsize=(18, 100), sharey=True)
 
-    if uploaded_file:
-        fig, ax = plt.subplots(1, 5, figsize=(18, 8), sharey=True)
-        curves = ["GR", "RHOB", "NPHI", "RT", "Sw"]
+        # 👉 Set depth ticks every 10 m
+        depth_locator = MultipleLocator(10)
 
-        for i, curve in enumerate(curves):
-            ax[i].plot(result_df[curve], result_df["Depth"])
-            ax[i].invert_yaxis()
-            ax[i].set_xlabel(curve)
+        # ---- GR ----
+        ax[0].plot(df["GR"], df["Depth"], color="green")
+        ax[0].set_xlabel("GR (API)")
+        ax[0].set_xlim(0, 150)
+
+        # ---- RHOB ----
+        ax[1].plot(df["RHOB"], df["Depth"], color="red")
+        ax[1].set_xlabel("RHOB (g/cc)")
+        ax[1].set_xlim(1.95, 2.95)
+
+        # ---- NPHI ----
+        ax[2].plot(df["NPHI"], df["Depth"], color="blue")
+        ax[2].set_xlabel("NPHI (v/v)")
+        ax[2].set_xlim(0.45, -0.15)
+
+        # ---- RT10 ----
+        ax[3].plot(df["RT"], df["Depth"], color="black")
+        ax[3].set_xlabel("RT (ohm.m)")
+        ax[3].set_xscale("log")
+        ax[3].set_xlim(0.2, 2000)
+
+        # ---- Vsh ----
+        if not result_df.empty:
+            ax[4].plot(result_df["Vsh"], result_df["Depth"], color="green")
+            ax[4].set_xlabel("Vsh")
+            ax[4].set_xlim(0, 1)
+
+        # ---- PHIE ----
+        if not result_df.empty:
+            ax[5].plot(result_df["PHIE"], result_df["Depth"], color="blue")
+            ax[5].set_xlabel("PHIE")
+            ax[5].set_xlim(0, 1)
+        
+        # ---- Sw ----
+        if not result_df.empty:
+            ax[6].plot(result_df["Sw"], result_df["Depth"], color="purple")
+            ax[6].set_xlabel("Sw")
+            ax[6].set_xlim(0, 1)
+
+        # ---- Common formatting ----
+        for a in ax:
+            a.invert_yaxis()
+            a.grid(True, linestyle="--", alpha=0.5)
+            a.yaxis.set_major_locator(depth_locator)
 
         plt.tight_layout()
         st.pyplot(fig)
+
 
 # ============================================================
 # TAB 4 – RESULTS & SUMMARY (ENHANCED)
@@ -180,7 +232,7 @@ with tab3:
 with tab4:
     st.header("📊 Zone & Reservoir Summary")
 
-    if uploaded_file:
+    if uploaded_file and not result_df.empty:
 
         summaries = []
         dz = df["Depth"].diff().median()
