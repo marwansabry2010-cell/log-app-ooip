@@ -7,7 +7,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MultipleLocator , AutoMinorLocator
+# from matplotlib.ticker import MultipleLocator , AutoMinorLocator
 
 
 
@@ -175,7 +175,7 @@ with tab3:
         fig, ax = plt.subplots(1, 7, figsize=(18, 100), sharey=True)
 
         # 👉 Set depth ticks every 10 m
-        depth_locator = MultipleLocator(10)
+        # depth_locator = MultipleLocator(10)
 
         # ---- GR ----
         ax[0].plot(df["GR"], df["Depth"], color="green")
