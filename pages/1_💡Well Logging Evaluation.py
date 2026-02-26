@@ -11,15 +11,22 @@ from matplotlib.ticker import MultipleLocator , AutoMinorLocator
 
 
 # ============================================================
-# STREAMLIT CONFIGURATION
+# STREAMLIT CONFIGURATION (MUST BE FIRST)
 # ============================================================
+st.set_page_config(page_title="Petrophysical Analysis", layout="wide")
+
 if not st.session_state.get("authenticated"):
     st.warning("Please login first")
     st.switch_page("Welcome.py")
 
 if st.session_state.get("authenticated"):
-    st.set_page_config(page_title="Petrophysical Analysis", layout="wide")
     st.title("🛢️ Integrated Petrophysical Evaluation")
+
+    # ============================================================
+    # INITIALIZE SESSION STATE FOR RESULT_DF
+    # ============================================================
+    if "result_df" not in st.session_state:
+        st.session_state.result_df = pd.DataFrame()
 
     # ============================================================
     # SIDEBAR – WELL INFORMATION
@@ -140,6 +147,10 @@ if st.session_state.get("authenticated"):
                 mask = (df["Depth"] >= zone["Top Depth"]) & (df["Depth"] <= zone["Base Depth"])
                 z = df[mask].copy()
 
+                # Skip empty zones
+                if z.empty:
+                    continue
+
                 # ---- VSH ----
                 if vsh_method == "Linear":
                     z["Vsh"] = vsh_linear(z["GR"], zone["GR_clean"], zone["GR_shale"])
@@ -154,6 +165,7 @@ if st.session_state.get("authenticated"):
                     z["PHIT"] = phi_d
 
                 z["PHIE"] = z["PHIT"] * (1 - z["Vsh"])
+                z["PHIE"] = z["PHIE"].clip(lower=0.0001)  # Prevent division by zero
 
                 # ---- WATER SATURATION ----
                 if sw_method == "Archie":
@@ -170,11 +182,11 @@ if st.session_state.get("authenticated"):
                 z["Zone"] = zone["Zone Name"]
                 results.append(z)
 
-            result_df = pd.concat(results)
+            # Store result_df in session state to avoid NameError in other tabs
             if results:
-                result_df = pd.concat(results)
+                st.session_state.result_df = pd.concat(results, ignore_index=True)
             else:
-                result_df = pd.DataFrame()
+                st.session_state.result_df = pd.DataFrame()
 
             st.success("✅ Petrophysical calculations completed")
 
@@ -184,7 +196,7 @@ if st.session_state.get("authenticated"):
     with tab3:
         st.header("📈 Log & Interpretation Plots")
         
-        if uploaded_file and not result_df.empty:
+        if uploaded_file and not st.session_state.result_df.empty:
             fig, ax = plt.subplots(1, 7, figsize=(18, 100), sharey=True)
 
             # 👉 Set depth ticks every 10 m
@@ -212,20 +224,20 @@ if st.session_state.get("authenticated"):
             ax[3].set_xlim(0.2, 2000)
 
             # ---- Vsh ----
-            if not result_df.empty:
-                ax[4].plot(result_df["Vsh"], result_df["Depth"], color="green")
+            if not st.session_state.result_df.empty:
+                ax[4].plot(st.session_state.result_df["Vsh"], st.session_state.result_df["Depth"], color="green")
                 ax[4].set_xlabel("Vsh")
                 ax[4].set_xlim(0, 1)
 
             # ---- PHIE ----
-            if not result_df.empty:
-                ax[5].plot(result_df["PHIE"], result_df["Depth"], color="blue")
+            if not st.session_state.result_df.empty:
+                ax[5].plot(st.session_state.result_df["PHIE"], st.session_state.result_df["Depth"], color="blue")
                 ax[5].set_xlabel("PHIE")
                 ax[5].set_xlim(0, 1)
             
             # ---- Sw ----
-            if not result_df.empty:
-                ax[6].plot(result_df["Sw"], result_df["Depth"], color="purple")
+            if not st.session_state.result_df.empty:
+                ax[6].plot(st.session_state.result_df["Sw"], st.session_state.result_df["Depth"], color="purple")
                 ax[6].set_xlabel("Sw")
                 ax[6].set_xlim(0, 1)
 
@@ -245,7 +257,7 @@ if st.session_state.get("authenticated"):
     with tab4:
         st.header("📊 Zone & Reservoir Summary")
 
-        if uploaded_file and not result_df.empty:
+        if uploaded_file and not st.session_state.result_df.empty:
 
             summaries = []
             dz = df["Depth"].diff().median()
@@ -255,7 +267,7 @@ if st.session_state.get("authenticated"):
                 top_depth = zone["Top Depth"]
                 base_depth = zone["Base Depth"]
 
-                z = result_df[result_df["Zone"] == zone_name]
+                z = st.session_state.result_df[st.session_state.result_df["Zone"] == zone_name]
                 if z.empty:
                     continue
 

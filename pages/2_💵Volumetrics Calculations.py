@@ -26,13 +26,11 @@ if st.session_state.get("authenticated"):
         Conversion_factor =  st.number_input('**Conversion_factor (7758)**', value=7758)
         st.write("________________________")
         OOIP_STB = Conversion_factor * Area_A_Acres * Net_Pay_Thickness_H_ft * Effective_Porosity_PHIE_fraction * (1-Water_Saturation_SW_fraction) /Oil_formation_volume_factor_Bo
-        Compute_Button = st.button(":red[**OOIP_STB**]")
         st.write("**OOIP_STB**: ", OOIP_STB)
         st.write("________________________")
         Recovery_Factor_fraction = st.number_input('**Recovery_Factor_fraction**', value=0.1)
         st.write("________________________")
         Recoverable_Oil = OOIP_STB * Recovery_Factor_fraction 
-        Compute_Button = st.button(":red[**Recoverable_Oil**]")
         st.write("**Recoverable_Oil**: ", Recoverable_Oil)
 
 
@@ -45,13 +43,11 @@ if st.session_state.get("authenticated"):
         Conversion_factor =  st.number_input('**Conversion_factor (43560)**', value=43560)
         st.write("________________________")
         OGIP_SCF = Conversion_factor * Area_A_Acres * Net_Pay_Thickness_H_ft * Effective_Porosity_PHIE_fraction * (1-Water_Saturation_SW_fraction) /Gas_formation_volume_factor_Bg
-        Compute_Button = st.button(":red[OGIP_SCF]")
         st.write("**OGIP_SCF**: ", OGIP_SCF)
         st.write("________________________")
         Recovery_Factor_fraction = st.number_input('**Recovery_Factor_fraction**', value=0.5)
         st.write("________________________")
         Recoverable_Gas = OGIP_SCF * Recovery_Factor_fraction 
-        Compute_Button = st.button(":red[**Recoverable_Gas**]")
         st.write("**Recoverable_Gas**: ", Recoverable_Gas)
     
 
