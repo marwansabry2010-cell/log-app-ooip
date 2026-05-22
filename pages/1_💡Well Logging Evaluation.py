@@ -17,7 +17,8 @@ st.set_page_config(page_title="Petrophysical Analysis", layout="wide")
 
 if not st.session_state.get("authenticated"):
     st.warning("Please login first")
-    st.switch_page("Welcome.py")
+    st.switch_page("Welcome")
+    st.stop()
 
 if st.session_state.get("authenticated"):
     st.title("🛢️ Integrated Petrophysical Evaluation")

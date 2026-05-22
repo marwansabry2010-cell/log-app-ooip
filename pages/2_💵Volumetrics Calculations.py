@@ -3,7 +3,8 @@ import pandas as pd
 
 if not st.session_state.get("authenticated"):
     st.warning("Please login first")
-    st.switch_page("Welcome.py")
+    st.switch_page("Welcome")
+    st.stop()
 
 if st.session_state.get("authenticated"):
 
